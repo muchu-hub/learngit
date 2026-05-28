@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>赫 & 莎</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif; min-height: 100vh;
+    background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 30%, #e8eaf6 60%, #fce4ec 100%);
+    background-size: 400% 400%; animation: gradientShift 20s ease infinite;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 16px 12px 60px; overflow-x: hidden; cursor: default;
+  }
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; }
+  }
+
+  .float-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .float-item { position: absolute; animation: floatUp linear infinite; opacity: 0.4; font-size: 26px; }
+  @keyframes floatUp {
+    0% { transform: translateY(105vh) rotate(0deg) scale(1); opacity: 0; }
+    10% { opacity: 0.5; } 80% { opacity: 0.35; }
+    100% { transform: translateY(-10vh) rotate(360deg) scale(0.3); opacity: 0; }
+  }
+
+  .click-heart { position: fixed; pointer-events: none; z-index: 999; font-size: 24px; animation: clickHeartFly 1.2s ease-out forwards; }
+  @keyframes clickHeartFly {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    30% { opacity: 1; transform: translate(var(--dx30),-40px) scale(1.3); }
+    100% { opacity: 0; transform: translate(var(--dx100),-120px) scale(0.5); }
+  }
+
+  .container { position: relative; z-index: 1; max-width: 500px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+
+  /* tabs */
+  .tab-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 24px; padding: 3px; margin-bottom: 8px; box-shadow: 0 4px 20px rgba(200,150,180,0.18); border: 1.5px solid rgba(255,255,255,0.7); }
+  .tab-btn { flex: 1; font-family: inherit; font-size: 14px; font-weight: 500; padding: 10px 8px; border: none; border-radius: 22px; cursor: pointer; background: transparent; color: #ad1457; transition: all 0.25s; }
+  .tab-btn.active { background: linear-gradient(135deg, #f48fb1, #ce93d8); color: #fff; }
+
+  .header { text-align: center; color: #d81b60; }
+  .header .title { font-size: 26px; font-weight: 700; letter-spacing: 2px; }
+  .header .subtitle { font-size: 12px; font-weight: 300; color: #ad1457; margin-top: 2px; }
+
+  .tab-panel { display: none; flex-direction: column; gap: 12px; }
+  .tab-panel.active { display: flex; }
+
+  /* card */
+  .card { background: rgba(255,255,255,0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 20px; padding: 20px 18px; box-shadow: 0 4px 20px rgba(200,150,180,0.12); border: 1.5px solid rgba(255,255,255,0.7); }
+  .card-label { font-size: 11px; font-weight: 500; color: #ce93d8; letter-spacing: 2px; margin-bottom: 10px; }
+
+  /* couple */
+  .couple-card { background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(252,228,236,0.7) 100%); border: 2px solid rgba(244,143,177,0.35); }
+  .couple-photo { width: 100%; border-radius: 16px; overflow: hidden; margin-bottom: 14px; position: relative; box-shadow: 0 4px 16px rgba(200,150,180,0.25); aspect-ratio: 1/1; max-height: 300px; }
+  .couple-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-names { position: absolute; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 14px; background: linear-gradient(transparent, rgba(0,0,0,0.45)); font-size: 14px; font-weight: 500; color: #fff; letter-spacing: 2px; }
+  .photo-names .heart-icon { font-size: 18px; animation: heartbeat 1s ease infinite; }
+  @keyframes heartbeat {
+    0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.15)}60%{transform:scale(1)}
+  }
+
+  /* timer */
+  .live-timer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+  .live-timer .item { text-align: center; background: rgba(255,255,255,0.55); border-radius: 12px; padding: 8px 4px; border: 1px solid rgba(244,143,177,0.2); }
+  .live-timer .val { font-size: 19px; font-weight: 700; color: #d81b60; line-height: 1.1; }
+  .live-timer .unit { font-size: 10px; color: #ce93d8; font-weight: 300; }
+  .big-days { text-align: center; }
+  .big-days .number { font-size: 44px; font-weight: 700; background: linear-gradient(135deg,#e91e63,#9c27b0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.1; }
+  .big-days .label { font-size: 13px; color: #ad1457; font-weight: 300; }
+  .start-date { text-align: center; font-size: 12px; color: #ce93d8; font-weight: 300; margin-bottom: 8px; }
+
+  /* progress */
+  .ann-progress { margin-bottom: 6px; }
+  .ann-progress .bar-bg { height: 6px; border-radius: 3px; background: rgba(244,143,177,0.15); overflow: hidden; margin-bottom: 4px; }
+  .ann-progress .bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#f48fb1,#ce93d8,#e91e63); transition: width 1s ease; }
+  .ann-progress .bar-text { display: flex; justify-content: space-between; font-size: 10px; color: #ce93d8; }
+
+  /* countdown */
+  .countdown-row { display: flex; gap: 8px; margin-top: 10px; }
+  .countdown-item { flex: 1; text-align: center; background: rgba(255,255,255,0.55); border-radius: 14px; padding: 10px 6px; border: 1px solid rgba(244,143,177,0.2); }
+  .countdown-item .val { font-size: 22px; font-weight: 700; color: #d81b60; line-height: 1.1; }
+  .countdown-item .unit { font-size: 10px; color: #ce93d8; }
+
+  /* quote */
+  .quote-card { text-align: center; }
+  .quote-text { font-size: 15px; color: #6a1b9a; line-height: 1.6; }
+  .quote-author { font-size: 12px; color: #ce93d8; margin-top: 6px; }
+
+  /* sub tab */
+  .sub-tab-bar { display: flex; gap: 4px; margin-bottom: 12px; }
+  .sub-tab { flex: 1; font-family: inherit; font-size: 12px; font-weight: 500; padding: 7px 8px; border: none; border-radius: 14px; cursor: pointer; background: rgba(255,255,255,0.5); color: #ad1457; transition: all 0.2s; }
+  .sub-tab.active { background: linear-gradient(135deg,#f48fb1,#ce93d8); color: #fff; }
+  .sub-panel { display: none; }
+  .sub-panel.active { display: block; }
+
+  /* timeline */
+  .timeline { display: flex; flex-direction: column; gap: 8px; }
+  .timeline-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; background: rgba(255,255,255,0.5); border-radius: 14px; border: 1px solid rgba(255,255,255,0.6); }
+  .timeline-dot { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg,#f48fb1,#ce93d8); display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 6px rgba(244,143,177,0.25); }
+  .timeline-content .t-title { font-size: 13px; font-weight: 500; color: #4a148c; }
+  .timeline-content .t-date { font-size: 11px; color: #ce93d8; margin-top: 1px; }
+  .timeline-content .t-desc { font-size: 11px; color: #9c27b0; margin-top: 2px; }
+
+  /* album */
+  .album-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .album-item { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 1/1; cursor: pointer; box-shadow: 0 2px 10px rgba(200,150,180,0.15); transition: transform 0.2s; }
+  .album-item:hover { transform: scale(1.03); }
+  .album-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .album-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 10px; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: #fff; font-size: 11px; font-weight: 400; }
+  .album-delete { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.4); color: #fff; border: none; cursor: pointer; font-size: 12px; line-height: 22px; text-align: center; }
+
+  /* lightbox */
+  .lightbox { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+  .lightbox.show { display: flex; }
+  .lightbox img { max-width: 92vw; max-height: 80vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
+  .lightbox-close { position: absolute; top: 20px; right: 24px; color: #fff; font-size: 28px; cursor: pointer; z-index: 101; }
+
+  /* holidays */
+  .holiday-list { display: flex; flex-direction: column; gap: 8px; }
+  .holiday-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.5); border-radius: 16px; border: 1px solid rgba(255,255,255,0.6); }
+  .holiday-row.upcoming { background: linear-gradient(135deg, rgba(252,228,236,0.55), rgba(255,255,255,0.55)); border: 1.5px solid rgba(244,143,177,0.35); }
+  .holiday-emoji { font-size: 28px; width: 38px; text-align: center; flex-shrink: 0; }
+  .holiday-info .name { font-size: 14px; font-weight: 500; color: #4a148c; }
+  .holiday-info .date-str { font-size: 11px; color: #ce93d8; }
+  .holiday-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 16px; white-space: nowrap; flex-shrink: 0; }
+  .badge-days { background: #fce4ec; color: #e91e63; }
+  .badge-soon { background: #fff3e0; color: #ef6c00; animation: pulse-badge 2s ease infinite; }
+  .badge-today { background: #e8f5e9; color: #2e7d32; animation: pulse-badge 1.5s ease infinite; }
+  @keyframes pulse-badge { 0%,100%{transform:scale(1)}50%{transform:scale(1.06)} }
+
+  /* buttons */
+  .settings-bar { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .settings-bar button, .btn-sm {
+    font-family: inherit; font-size: 12px; font-weight: 500; padding: 8px 18px; border: none; border-radius: 18px; cursor: pointer;
+    background: rgba(255,255,255,0.6); color: #ad1457; border: 1px solid rgba(244,143,177,0.2); transition: all 0.2s;
+  }
+  .btn-sm:hover, .settings-bar button:hover { background: rgba(255,255,255,0.9); box-shadow: 0 2px 10px rgba(200,150,180,0.2); }
+  .btn-primary { background: linear-gradient(135deg,#f48fb1,#ce93d8); color: #fff; border: none; font-size: 15px; padding: 12px 32px; }
+  .btn-primary:hover { box-shadow: 0 4px 14px rgba(244,143,177,0.4); transform: translateY(-1px); }
+
+  /* modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: rgba(255,255,255,0.94); backdrop-filter: blur(20px); border-radius: 22px; padding: 26px 22px; max-width: 380px; width: 90%; box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+  .modal h3 { font-size: 18px; color: #d81b60; margin-bottom: 16px; text-align: center; }
+  .modal label { display: block; font-size: 11px; color: #ce93d8; margin-bottom: 4px; letter-spacing: 1px; }
+  .modal input, .modal select { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1.5px solid rgba(244,143,177,0.3); font-family: inherit; font-size: 14px; margin-bottom: 12px; background: rgba(255,255,255,0.6); color: #4a148c; outline: none; }
+  .modal input:focus { border-color: #f48fb1; }
+  .modal .btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .modal button { font-family: inherit; font-size: 13px; font-weight: 500; padding: 9px 20px; border-radius: 16px; cursor: pointer; border: none; }
+  .btn-save { background: linear-gradient(135deg,#f48fb1,#ce93d8); color: #fff; }
+  .btn-cancel { background: rgba(0,0,0,0.05); color: #ad1457; }
+
+  /* tea */
+  .input-row { margin-bottom: 12px; }
+  .input-row label { display: block; font-size: 12px; color: #6a1b9a; font-weight: 500; margin-bottom: 4px; }
+  .input-row input { width: 100%; padding: 10px 14px; border-radius: 12px; border: 1.5px solid rgba(244,143,177,0.3); font-family: inherit; font-size: 14px; background: rgba(255,255,255,0.6); color: #4a148c; outline: none; }
+  .input-row input:focus { border-color: #f48fb1; }
+  .input-row input::placeholder { color: #ce93d8; }
+
+  .opt-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .opt-row .o-label { font-size: 12px; color: #6a1b9a; font-weight: 500; width: 36px; flex-shrink: 0; }
+  .opt-row .o-btns { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
+  .o-btn { font-family: inherit; font-size: 11px; padding: 5px 11px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(244,143,177,0.2); background: rgba(255,255,255,0.5); color: #ad1457; transition: all 0.2s; }
+  .o-btn.active { background: #f48fb1; color: #fff; border-color: transparent; }
+  .o-btn.topping.active { background: #ce93d8; }
+
+  .tea-summary { margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: rgba(255,255,255,0.5); }
+  .tea-summary .s-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; color: #4a148c; }
+
+  .history-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.5); margin-bottom: 5px; font-size: 12px; color: #4a148c; }
+  .history-item .h-icon { font-size: 22px; flex-shrink: 0; }
+  .history-item .h-info { flex: 1; }
+
+  .empty-state { text-align: center; padding: 16px; color: #ce93d8; font-size: 13px; font-weight: 300; }
+  .footer { text-align: center; font-size: 10px; color: #ce93d8; font-weight: 300; letter-spacing: 1px; padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="float-container" id="floatContainer"></div>
+<div class="container">
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('ann')">💕 纪念日</button>
+    <button class="tab-btn" onclick="switchTab('tea')">🧋 点奶茶</button>
+  </div>
+
+  <!-- ====== 纪念日 ====== -->
+  <div class="tab-panel active" id="panel-ann">
+    <div class="header">
+      <div class="title">赫 ♡ 莎</div>
+      <div class="subtitle">珍惜每一个重要的日子</div>
+    </div>
+
+    <div class="card couple-card">
+      <div class="couple-photo">
+        <img src="photos/生成卡通头像.png" alt="赫 & 莎">
+        <div class="photo-names"><span>莎</span><span class="heart-icon">💕</span><span>赫</span></div>
+      </div>
+      <div class="big-days"><div class="number" id="daysTogether">--</div><div class="label">我们已经在一起</div></div>
+      <div class="start-date" id="startDateDisplay"></div>
+      <div class="live-timer">
+        <div class="item"><div class="val" id="ty">--</div><div class="unit">年</div></div>
+        <div class="item"><div class="val" id="tm">--</div><div class="unit">月</div></div>
+        <div class="item"><div class="val" id="td">--</div><div class="unit">天</div></div>
+        <div class="item"><div class="val" id="thms"><span id="th">--</span>:<span id="tmi">--</span>:<span id="ts">--</span></div><div class="unit">时:分:秒</div></div>
+      </div>
+      <div class="ann-progress">
+        <div class="bar-bg"><div class="bar-fill" id="annBar" style="width:0%"></div></div>
+        <div class="bar-text"><span id="annStart">--</span><span id="annEnd">--</span></div>
+      </div>
+      <div class="countdown-row" id="countdownRow">
+        <div class="countdown-item"><div class="val" id="cdDays">--</div><div class="unit">天</div></div>
+        <div class="countdown-item"><div class="val" id="cdHours">--</div><div class="unit">小时</div></div>
+        <div class="countdown-item"><div class="val" id="cdMins">--</div><div class="unit">分钟</div></div>
+        <div class="countdown-item"><div class="val" id="cdSecs">--</div><div class="unit">秒</div></div>
+      </div>
+      <div style="text-align:center;margin-top:8px;font-size:11px;color:#ce93d8;" id="nextAnniversaryLabel">距离周年纪念日</div>
+    </div>
+
+    <div class="card quote-card">
+      <div class="card-label">每日情话</div>
+      <div class="quote-text" id="quoteText"></div>
+      <div class="quote-author" id="quoteAuthor"></div>
+    </div>
+
+    <div class="card">
+      <div class="sub-tab-bar">
+        <button class="sub-tab active" onclick="switchSubTab('meeting')" id="subTabMeeting">📅 见面倒计时</button>
+        <button class="sub-tab" onclick="switchSubTab('status')" id="subTabStatus">💬 在干什么</button>
+      </div>
+      <div class="sub-panel active" id="subPanelMeeting" style="text-align:center;">
+        <div class="big-days"><div class="number" id="meetingDays">--</div><div class="label">天</div></div>
+        <div class="countdown-row" style="margin-top:4px;">
+          <div class="countdown-item"><div class="val" id="mcHours">--</div><div class="unit">小时</div></div>
+          <div class="countdown-item"><div class="val" id="mcMins">--</div><div class="unit">分钟</div></div>
+          <div class="countdown-item"><div class="val" id="mcSecs">--</div><div class="unit">秒</div></div>
+        </div>
+        <div style="font-size:12px;color:#ce93d8;margin-top:4px;" id="meetingDateLabel">还没有设置见面日期</div>
+        <button class="btn-sm" onclick="openMeetingSettings()" style="margin-top:8px;">设置见面日期</button>
+      </div>
+      <div class="sub-panel" id="subPanelStatus">
+        <div id="statusDisplay"><div class="empty-state">还没有更新状态呢~</div></div>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <input type="text" id="statusInput" placeholder="例如：正在想莎..." style="flex:1;padding:9px 12px;border-radius:12px;border:1.5px solid rgba(244,143,177,0.3);font-family:inherit;font-size:13px;background:rgba(255,255,255,0.6);color:#4a148c;outline:none;">
+          <button class="btn-primary" onclick="updateStatus()" style="padding:9px 16px;font-size:13px;">更新</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">我们的里程碑</div>
+      <div class="timeline" id="timeline"></div>
+      <button class="btn-sm" onclick="openMilestoneForm()" style="display:block;margin:10px auto 0;">+ 添加里程碑</button>
+    </div>
+
+    <div class="card">
+      <div class="card-label">回忆相册</div>
+      <div class="album-grid" id="albumGrid"><div class="empty-state" style="grid-column:1/-1;">还没有照片<br>添加你们的甜蜜瞬间吧 💕</div></div>
+      <button class="btn-sm" onclick="openAlbumForm()" style="display:block;margin:10px auto 0;">+ 添加照片</button>
+    </div>
+
+    <div class="card">
+      <div class="card-label">重要节日</div>
+      <div class="holiday-list" id="holidayList"></div>
+    </div>
+
+    <div class="settings-bar">
+      <button onclick="openSettings()">设置恋爱日期</button>
+      <button onclick="openHolidayForm()">添加节日</button>
+    </div>
+
+    <div class="footer">赫 ❤️ 莎 — 记录我们的每一天</div>
+  </div>
+
+  <!-- ====== 点奶茶 ====== -->
+  <div class="tab-panel" id="panel-tea">
+    <div class="header">
+      <div class="title">🧋 为莎点一杯奶茶</div>
+      <div class="subtitle">赫的小小心意</div>
+    </div>
+    <div class="card">
+      <div class="card-label">我想喝...</div>
+      <div class="input-row"><label>店名 / 奶茶名称</label><input type="text" id="drinkName" placeholder="例如：喜茶 多肉葡萄"></div>
+      <div class="input-row"><label>价格（可选）</label><input type="number" id="drinkPrice" placeholder="例如：22" style="width:100px;"></div>
+      <div class="opt-row"><span class="o-label">甜度</span><span class="o-btns" id="sugarBtns"></span></div>
+      <div class="opt-row"><span class="o-label">温度</span><span class="o-btns" id="iceBtns"></span></div>
+      <div class="opt-row"><span class="o-label">加料</span><span class="o-btns" id="toppingBtns"></span></div>
+      <div class="tea-summary" id="teaSummary"></div>
+      <div style="text-align:center;margin-top:12px;"><button class="btn-primary" onclick="placeOrder()">💝 下单</button></div>
+    </div>
+    <div class="card">
+      <div class="card-label">订单记录</div>
+      <div id="orderHistory"></div>
+    </div>
+  </div>
+</div>
+
+<!-- modals -->
+<div class="modal-overlay" id="settingsModal"><div class="modal"><h3>设置恋爱开始日期</h3><label>选择你们在一起的那一天</label><input type="date" id="coupleDateInput"><div class="btn-row"><button class="btn-cancel" onclick="closeSettings()">取消</button><button class="btn-save" onclick="saveCoupleDate()">保存</button></div></div></div>
+<div class="modal-overlay" id="holidayModal"><div class="modal"><h3>添加重要节日</h3><label>节日名称</label><input type="text" id="holidayName" placeholder="例如：第一次旅行纪念日"><label>日期</label><input type="date" id="holidayDate"><label>图标</label><select id="holidayEmoji"><option value="🎉">🎉 庆祝</option><option value="🎂">🎂 生日</option><option value="💝">💝 浪漫</option><option value="🌟">🌟 特别</option><option value="🎄">🎄 圣诞</option><option value="🎊">🎊 节日</option><option value="🌸">🌸 春日</option><option value="🍂">🍂 秋日</option><option value="🎁">🎁 礼物</option><option value="💍">💍 纪念</option><option value="🌈">🌈 美好</option></select><label>每年重复</label><select id="holidayRepeat"><option value="true">每年提醒</option><option value="false">仅此一次</option></select><div class="btn-row"><button class="btn-cancel" onclick="closeHolidayForm()">取消</button><button class="btn-save" onclick="addHoliday()">添加</button></div></div></div>
+<div class="modal-overlay" id="milestoneModal"><div class="modal"><h3>添加里程碑</h3><label>标题</label><input type="text" id="msTitle" placeholder="例如：第一次旅行"><label>日期</label><input type="date" id="msDate"><label>一句话描述</label><input type="text" id="msDesc" placeholder="例如：一起去了海边"><label>图标</label><select id="msEmoji"><option value="💕">💕 心动</option><option value="✈️">✈️ 旅行</option><option value="🎂">🎂 生日</option><option value="💍">💍 承诺</option><option value="🏠">🏠 新家</option><option value="🎓">🎓 毕业</option><option value="🎉">🎉 庆祝</option><option value="🌟">🌟 特别</option></select><div class="btn-row"><button class="btn-cancel" onclick="closeMilestoneForm()">取消</button><button class="btn-save" onclick="addMilestone()">添加</button></div></div></div>
+<div class="modal-overlay" id="orderModal"><div class="modal" style="text-align:center;"><div style="font-size:44px;margin-bottom:8px;">💌</div><h3>下单成功！</h3><p id="orderMsg" style="font-size:13px;color:#6a1b9a;margin-bottom:16px;line-height:1.6;"></p><button class="btn-save" onclick="document.getElementById('orderModal').classList.remove('show')">好的</button></div></div>
+<div class="modal-overlay" id="meetingModal"><div class="modal"><h3>设置下次见面日期</h3><label>选择下次见面的日期</label><input type="date" id="meetingDateInput"><div class="btn-row"><button class="btn-cancel" onclick="closeMeetingSettings()">取消</button><button class="btn-save" onclick="saveMeetingDate()">保存</button></div></div></div>
+<div class="modal-overlay" id="albumModal"><div class="modal"><h3>添加照片</h3><label>照片文件名</label><input type="text" id="albumFile" placeholder="例如：hesha.jpg（放在 photos/ 文件夹）"><label>一句话说明</label><input type="text" id="albumCaption" placeholder="例如：第一次一起看海"><label>日期</label><input type="date" id="albumDate"><div class="btn-row"><button class="btn-cancel" onclick="closeAlbumForm()">取消</button><button class="btn-save" onclick="addAlbumPhoto()">添加</button></div></div></div>
+<div class="lightbox" id="lightbox" onclick="closeLightbox()"><span class="lightbox-close">&times;</span><img src="" id="lightboxImg"></div>
+
+<script>
+// ====== tabs ======
+function switchSubTab(t) {
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('active'));
+  if(t==='meeting'){ document.getElementById('subTabMeeting').classList.add('active'); document.getElementById('subPanelMeeting').classList.add('active'); }
+  else { document.getElementById('subTabStatus').classList.add('active'); document.getElementById('subPanelStatus').classList.add('active'); }
+}
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  if(t==='ann'){ document.querySelectorAll('.tab-btn')[0].classList.add('active'); document.getElementById('panel-ann').classList.add('active'); }
+  else { document.querySelectorAll('.tab-btn')[1].classList.add('active'); document.getElementById('panel-tea').classList.add('active'); }
+}
+
+// ====== data ======
+const SK_COUPLE='anniversary_couple_date', SK_HOLIDAYS='anniversary_holidays', SK_MILESTONES='anniversary_milestones', SK_MEETING='anniversary_meeting_date', SK_STATUS='anniversary_status', SK_ALBUM='anniversary_album';
+
+const LOVE_QUOTES=[
+  {text:'遇见你，是我这辈子最美丽的意外。',author:'给最爱的莎'},{text:'春风十里不如你，夏阳满天不及你。',author:'赫'},{text:'和你在一起的每一天，都是最好的时光。',author:'赫'},{text:'世界很大，但我的心很小，只装得下你一个人。',author:'给最爱的莎'},{text:'你的笑容，是我每天醒来最大的动力。',author:'赫'},{text:'不管是晴天还是雨天，有你在身边就是好天气。',author:'赫'},{text:'我想和你一起，看遍世间所有的风景。',author:'给最爱的莎'},{text:'执子之手，与子偕老。',author:'赫 & 莎'},{text:'你是我所有温柔和浪漫的来源。',author:'赫'},{text:'谢谢你来到我的世界，让它变得如此美好。',author:'给最爱的莎'},{text:'爱不是轰轰烈烈，而是细水长流的陪伴。',author:'赫 & 莎'},{text:'有你的地方，就是家。',author:'赫'},{text:'我没有什么超能力，只想超爱你。',author:'给最爱的莎'},{text:'时光往复，爱你如初。',author:'赫'},{text:'你是年少的欢喜，也是余生的甜蜜。',author:'赫 & 莎'},
+];
+const DEFAULT_HOLIDAYS=[
+  {id:'valentine',name:'情人节',emoji:'💝',date:'02-14',repeat:true},{id:'520',name:'520 表白日',emoji:'💌',date:'05-20',repeat:true},{id:'qixi',name:'七夕情人节',emoji:'🎋',date:'--',repeat:true,lunar:true,lunarText:'农历七月初七'},{id:'xmas',name:'圣诞节',emoji:'🎄',date:'12-25',repeat:true},{id:'newyear',name:'元旦新年',emoji:'🎊',date:'01-01',repeat:true},{id:'midautumn',name:'中秋节',emoji:'🥮',date:'--',repeat:true,lunar:true,lunarText:'农历八月十五'},
+];
+const DEFAULT_MILESTONES=[{id:'ms1',title:'我们在一起了',date:'',emoji:'💕',desc:'最美好的一天开始'}];
+
+function load(k){return localStorage.getItem(k)}
+function save(k,v){localStorage.setItem(k,v);renderAnn()}
+function loadJSON(k,def){try{const r=localStorage.getItem(k);return r?JSON.parse(r):def}catch(e){return def}}
+function saveJSON(k,v){localStorage.setItem(k,JSON.stringify(v));renderAnn()}
+
+function daysBetween(d1,d2){return Math.floor((d2-d1)/86400000)}
+function monthsBetween(d1,d2){return (d2.getFullYear()-d1.getFullYear())*12+d2.getMonth()-d1.getMonth()-(d2.getDate()<d1.getDate()?1:0)}
+function nextAnniversary(s,n){const y=n.getFullYear();let a=new Date(y,s.getMonth(),s.getDate());if(a<=n)a.setFullYear(y+1);return a}
+function currentAnniversaryStart(s,n){const y=n.getFullYear();let a=new Date(y,s.getMonth(),s.getDate());if(a>n)a.setFullYear(y-1);return a}
+function formatDateCN(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'}
+
+const LUNAR_APPROX={ '七夕':y=>new Date(y,7,{2025:29,2026:19,2027:7,2028:26,2029:15,2030:4}[y]||7), '中秋':y=>new Date(y,8,{2025:6,2026:25,2027:15,2028:3,2029:22,2030:12}[y]||15) };
+function getHolidayDate(h,now){if(h.lunar){if(h.name==='七夕情人节')return LUNAR_APPROX['七夕'](now.getFullYear());if(h.name==='中秋节')return LUNAR_APPROX['中秋'](now.getFullYear());return null}const[m,d]=h.date.split('-').map(Number);let t=new Date(now.getFullYear(),m-1,d);if(t<=now)t.setFullYear(now.getFullYear()+1);return t}
+
+// ====== render ======
+function renderCoupleCard(){
+  const ds=load(SK_COUPLE),now=new Date();
+  if(!ds){document.getElementById('daysTogether').textContent='?';document.getElementById('startDateDisplay').textContent='点击下方按钮设置恋爱开始日期吧';document.getElementById('cdDays').textContent='--';document.getElementById('cdHours').textContent='--';document.getElementById('cdMins').textContent='--';document.getElementById('cdSecs').textContent='--';['ty','tm','td','th','tmi','ts'].forEach(id=>document.getElementById(id).textContent='--');return}
+  const s=new Date(ds+'T00:00:00');
+  document.getElementById('daysTogether').textContent=daysBetween(s,now);
+  document.getElementById('startDateDisplay').textContent='从 '+formatDateCN(s)+' 开始';
+  const tm=monthsBetween(s,now),y=Math.floor(tm/12),m=tm%12;
+  let ld=new Date(now.getFullYear(),now.getMonth(),s.getDate());if(ld>now)ld.setMonth(ld.getMonth()-1);
+  const d=Math.floor((now-ld)/86400000);
+  document.getElementById('ty').textContent=y;document.getElementById('tm').textContent=m;document.getElementById('td').textContent=d;
+  document.getElementById('th').textContent=String(now.getHours()).padStart(2,'0');document.getElementById('tmi').textContent=String(now.getMinutes()).padStart(2,'0');document.getElementById('ts').textContent=String(now.getSeconds()).padStart(2,'0');
+  const aS=currentAnniversaryStart(s,now),aE=nextAnniversary(s,now),pct=Math.min(100,Math.round(((now-aS)/(aE-aS))*100));
+  document.getElementById('annBar').style.width=pct+'%';document.getElementById('annStart').textContent=formatDateCN(aS);document.getElementById('annEnd').textContent=formatDateCN(aE);
+  const diff=aE-now;
+  if(diff<=0){document.getElementById('cdDays').textContent='0';document.getElementById('cdHours').textContent='0';document.getElementById('cdMins').textContent='0';document.getElementById('cdSecs').textContent='0';document.getElementById('nextAnniversaryLabel').textContent='今天就是纪念日！🎉'}
+  else{const ts=Math.floor(diff/1000);document.getElementById('cdDays').textContent=Math.floor(ts/86400);document.getElementById('cdHours').textContent=Math.floor((ts%86400)/3600);document.getElementById('cdMins').textContent=Math.floor((ts%3600)/60);document.getElementById('cdSecs').textContent=ts%60;document.getElementById('nextAnniversaryLabel').textContent='距离 '+(aE.getFullYear()-s.getFullYear())+' 周年纪念日 ('+formatDateCN(aE)+')'}
+}
+
+function renderMilestones(){
+  const ms=loadJSON(SK_MILESTONES,DEFAULT_MILESTONES).map(m=>{if(m.date){const d=new Date(m.date+'T00:00:00');return{...m,sortDate:d,dateStr:formatDateCN(d)}}return{...m,sortDate:new Date(0),dateStr:'开始的那天'}});
+  ms.sort((a,b)=>b.sortDate-a.sortDate);
+  document.getElementById('timeline').innerHTML=ms.map(m=>`<div class="timeline-item"><div class="timeline-dot">${m.emoji}</div><div class="timeline-content"><div class="t-title">${m.title}</div><div class="t-date">${m.dateStr}</div>${m.desc?`<div class="t-desc">${m.desc}</div>`:''}</div></div>`).join('');
+}
+
+function renderHolidays(){
+  const hols=loadJSON(SK_HOLIDAYS,DEFAULT_HOLIDAYS),now=new Date(),ts=`${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const list=hols.map(h=>{
+    const t=getHolidayDate(h,now);let dl=null,it=false;
+    if(h.lunar){if(t){dl=Math.ceil((t-now)/86400000);if(dl<0&&t.toDateString()===now.toDateString())dl=0}}
+    else{const[m,d]=h.date.split('-').map(Number);if(`${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`===ts){it=true;dl=0}else{let x=new Date(now.getFullYear(),m-1,d);if(x<=now)x.setFullYear(now.getFullYear()+1);dl=Math.ceil((x-now)/86400000)}}
+    let badge='',bc='';if(it){badge='今天';bc='badge-today'}else if(dl!==null&&dl<=7){badge='还有 '+dl+' 天';bc='badge-soon'}else if(dl!==null){badge='还有 '+dl+' 天';bc='badge-days'}
+    let dt='';if(h.lunar&&h.lunarText)dt=h.lunarText+' · '+(t?formatDateCN(t):'');else{const[m,d]=h.date.split('-').map(Number);dt='每年 '+m+'月'+d+'日'}
+    return{...h,dateText:dt,badge,badgeClass:bc,isToday:it,upcoming:dl!==null&&dl<=7&&dl>=0};
+  });
+  list.sort((a,b)=>{const p=x=>x.isToday?0:x.upcoming?1:2;return p(a)-p(b)});
+  document.getElementById('holidayList').innerHTML=list.map(h=>`<div class="holiday-row${h.upcoming||h.isToday?' upcoming':''}"><div class="holiday-emoji">${h.emoji}</div><div class="holiday-info"><div class="name">${h.name}${h.isToday?' 🎀':''}</div><div class="date-str">${h.dateText}</div></div>${h.badge?`<div class="holiday-badge ${h.badgeClass}">${h.badge}</div>`:''}</div>`).join('');
+}
+
+function renderQuote(){
+  const ds=load(SK_COUPLE),now=new Date();
+  let idx=ds?daysBetween(new Date(ds+'T00:00:00'),now)%LOVE_QUOTES.length:now.getDate()%LOVE_QUOTES.length;
+  const q=LOVE_QUOTES[idx];document.getElementById('quoteText').textContent='"'+q.text+'"';document.getElementById('quoteAuthor').textContent='—— '+q.author;
+}
+
+// meeting
+function renderMeetingCountdown(){
+  const ds=load(SK_MEETING),now=new Date();
+  if(!ds){document.getElementById('meetingDays').textContent='?';document.getElementById('mcHours').textContent='--';document.getElementById('mcMins').textContent='--';document.getElementById('mcSecs').textContent='--';document.getElementById('meetingDateLabel').textContent='还没有设置见面日期';return}
+  const m=new Date(ds+'T00:00:00'),diff=m-now;
+  if(diff<=0){document.getElementById('meetingDays').textContent='🎉';document.getElementById('mcHours').textContent='0';document.getElementById('mcMins').textContent='0';document.getElementById('mcSecs').textContent='0';document.getElementById('meetingDateLabel').textContent='今天就是见面日！';return}
+  const ts=Math.floor(diff/1000);document.getElementById('meetingDays').textContent=Math.floor(ts/86400);document.getElementById('mcHours').textContent=Math.floor((ts%86400)/3600);document.getElementById('mcMins').textContent=Math.floor((ts%3600)/60);document.getElementById('mcSecs').textContent=ts%60;document.getElementById('meetingDateLabel').textContent='见面日期：'+formatDateCN(m);
+}
+function openMeetingSettings(){const c=load(SK_MEETING);if(c)document.getElementById('meetingDateInput').value=c;document.getElementById('meetingModal').classList.add('show')}
+function closeMeetingSettings(){document.getElementById('meetingModal').classList.remove('show')}
+function saveMeetingDate(){const v=document.getElementById('meetingDateInput').value;if(!v){alert('请选择见面日期哦~');return}save(SK_MEETING,v);closeMeetingSettings()}
+
+// status
+function updateStatus(){const t=document.getElementById('statusInput').value.trim();if(!t){alert('写点什么吧~');return}saveJSON(SK_STATUS,{text:t,time:new Date().toLocaleString('zh-CN')});document.getElementById('statusInput').value='';renderStatus()}
+function renderStatus(){const s=loadJSON(SK_STATUS,null);if(!s){document.getElementById('statusDisplay').innerHTML='<div class="empty-state">还没有更新状态呢~</div>';return}document.getElementById('statusDisplay').innerHTML=`<div style="padding:10px 14px;border-radius:12px;background:rgba(252,228,236,0.5);border:1px solid rgba(244,143,177,0.25);"><div style="font-size:14px;color:#4a148c;font-weight:500;">💬 ${s.text}</div><div style="font-size:10px;color:#ce93d8;margin-top:4px;">${s.time}</div></div>`}
+
+// album
+function loadAlbum(){return loadJSON(SK_ALBUM,[])}
+function openAlbumForm(){document.getElementById('albumFile').value='';document.getElementById('albumCaption').value='';document.getElementById('albumDate').value='';document.getElementById('albumModal').classList.add('show')}
+function closeAlbumForm(){document.getElementById('albumModal').classList.remove('show')}
+function addAlbumPhoto(){
+  const file=document.getElementById('albumFile').value.trim(),cap=document.getElementById('albumCaption').value.trim(),date=document.getElementById('albumDate').value;
+  if(!file){alert('请填写照片文件名哦~');return}
+  const album=loadAlbum();album.push({id:'ap_'+Date.now(),file,cap,date:date||''});saveJSON(SK_ALBUM,album);closeAlbumForm();
+}
+function deleteAlbumPhoto(id){const album=loadAlbum().filter(p=>p.id!==id);saveJSON(SK_ALBUM,album)}
+function openLightbox(file){document.getElementById('lightboxImg').src='photos/'+file;document.getElementById('lightbox').classList.add('show')}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('show')}
+function renderAlbum(){
+  const album=loadAlbum();
+  if(!album.length){document.getElementById('albumGrid').innerHTML='<div class="empty-state" style="grid-column:1/-1;">还没有照片<br>添加你们的甜蜜瞬间吧 💕</div>';return}
+  album.sort((a,b)=>b.id.localeCompare(a.id));
+  document.getElementById('albumGrid').innerHTML=album.map(p=>{
+    const ds=p.date?formatDateCN(new Date(p.date+'T00:00:00')):'';
+    return `<div class="album-item" onclick="openLightbox('${p.file}')"><img src="photos/${p.file}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23fce4ec%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 font-size=%2236%22>🖼️</text></svg>'"><div class="album-caption">${p.cap||''}${ds?' · '+ds:''}</div><button class="album-delete" onclick="event.stopPropagation();deleteAlbumPhoto('${p.id}')">&times;</button></div>`;
+  }).join('');
+}
+
+function renderAnn(){renderCoupleCard();renderHolidays();renderMilestones();renderQuote();renderMeetingCountdown();renderStatus();renderAlbum()}
+
+// modals
+function openSettings(){const c=load(SK_COUPLE);if(c)document.getElementById('coupleDateInput').value=c;document.getElementById('settingsModal').classList.add('show')}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('show')}
+function saveCoupleDate(){const v=document.getElementById('coupleDateInput').value;if(!v){alert('请选择一个日期哦~');return}save(SK_COUPLE,v);closeSettings()}
+function openHolidayForm(){document.getElementById('holidayName').value='';document.getElementById('holidayDate').value='';document.getElementById('holidayEmoji').value='🎉';document.getElementById('holidayRepeat').value='true';document.getElementById('holidayModal').classList.add('show')}
+function closeHolidayForm(){document.getElementById('holidayModal').classList.remove('show')}
+function addHoliday(){const n=document.getElementById('holidayName').value.trim(),dv=document.getElementById('holidayDate').value,e=document.getElementById('holidayEmoji').value,r=document.getElementById('holidayRepeat').value==='true';if(!n||!dv){alert('请填写节日名称和日期哦~');return}const p=dv.split('-'),h=loadJSON(SK_HOLIDAYS,DEFAULT_HOLIDAYS);h.push({id:'c_'+Date.now(),name:n,emoji:e,date:p[1]+'-'+p[2],repeat:r});saveJSON(SK_HOLIDAYS,h);closeHolidayForm()}
+function openMilestoneForm(){document.getElementById('msTitle').value='';document.getElementById('msDate').value='';document.getElementById('msDesc').value='';document.getElementById('msEmoji').value='💕';document.getElementById('milestoneModal').classList.add('show')}
+function closeMilestoneForm(){document.getElementById('milestoneModal').classList.remove('show')}
+function addMilestone(){const t=document.getElementById('msTitle').value.trim(),dv=document.getElementById('msDate').value,d=document.getElementById('msDesc').value.trim(),e=document.getElementById('msEmoji').value;if(!t){alert('请填写标题哦~');return}const ms=loadJSON(SK_MILESTONES,DEFAULT_MILESTONES);ms.push({id:'ms_'+Date.now(),title:t,date:dv,desc:d,emoji:e});saveJSON(SK_MILESTONES,ms);closeMilestoneForm()}
+
+// tea
+const SUGAR_OPTS=['正常糖','七分糖','半糖','三分糖','无糖'],ICE_OPTS=['正常冰','少冰','去冰','热饮'],TOPPINGS=['珍珠','椰果','布丁','芋圆','脆波波','奶盖'],STORAGE_TEA='tea_order_history_simple';
+let selSugar='七分糖',selIce='少冰',selToppings=[];
+function loadTeaOrders(){try{const r=localStorage.getItem(STORAGE_TEA);return r?JSON.parse(r):[]}catch(e){return[]}}
+function saveTeaOrder(o){const os=loadTeaOrders();os.unshift(o);if(os.length>30)os.length=30;localStorage.setItem(STORAGE_TEA,JSON.stringify(os))}
+function renderTeaOpts(){
+  document.getElementById('sugarBtns').innerHTML=SUGAR_OPTS.map(s=>`<button class="o-btn${selSugar===s?' active':''}" onclick="selSugar='${s}';renderTeaOpts();updateTeaSummary()">${s}</button>`).join('');
+  document.getElementById('iceBtns').innerHTML=ICE_OPTS.map(s=>`<button class="o-btn${selIce===s?' active':''}" onclick="selIce='${s}';renderTeaOpts();updateTeaSummary()">${s}</button>`).join('');
+  document.getElementById('toppingBtns').innerHTML=TOPPINGS.map(t=>`<button class="o-btn topping${selToppings.includes(t)?' active':''}" onclick="toggleTopping('${t}')">${t}</button>`).join('');
+}
+function toggleTopping(t){if(selToppings.includes(t))selToppings=selToppings.filter(x=>x!==t);else selToppings.push(t);renderTeaOpts();updateTeaSummary()}
+function updateTeaSummary(){const n=document.getElementById('drinkName').value.trim()||'（未填写）',p=parseFloat(document.getElementById('drinkPrice').value)||0;let l=[`<div class="s-row"><span>🧋 ${n}</span>${p?'<span>¥'+p+'</span>':''}</div>`,`<div class="s-row"><span>甜度 / 温度</span><span>${selSugar} / ${selIce}</span></div>`];if(selToppings.length)l.push(`<div class="s-row"><span>加料</span><span>${selToppings.join('、')}</span></div>`);document.getElementById('teaSummary').innerHTML=l.join('')}
+document.getElementById('drinkName').addEventListener('input',updateTeaSummary);
+document.getElementById('drinkPrice').addEventListener('input',updateTeaSummary);
+function placeOrder(){const n=document.getElementById('drinkName').value.trim();if(!n){alert('请填写想喝的奶茶哦~');return}const p=parseFloat(document.getElementById('drinkPrice').value)||0,o={time:new Date().toLocaleString('zh-CN'),name:n,price:p,sugar:selSugar,ice:selIce,toppings:[...selToppings]};saveTeaOrder(o);document.getElementById('orderMsg').innerHTML=`给莎点了<br><b>${o.name}</b><br>${o.sugar} / ${o.ice}`+(o.toppings.length?`<br>加料：${o.toppings.join('、')}`:'')+(o.price?`<br>价格：¥${o.price}`:'')+`<br><br>快去拿奶茶吧~ 🧋`;document.getElementById('orderModal').classList.add('show');document.getElementById('drinkName').value='';document.getElementById('drinkPrice').value='';selToppings=[];renderTeaOpts();updateTeaSummary();renderTeaHistory()}
+function renderTeaHistory(){const os=loadTeaOrders();if(!os.length){document.getElementById('orderHistory').innerHTML='<div class="empty-state">还没有订单记录<br>给莎点第一杯奶茶吧 💕</div>';return}document.getElementById('orderHistory').innerHTML=os.map(o=>`<div class="history-item"><span class="h-icon">🧋</span><span class="h-info"><b>${o.name}</b><br><span style="font-size:10px;color:#ce93d8;">${o.sugar} / ${o.ice}${o.toppings.length?' + '+o.toppings.join('、'):''} · ${o.time}</span></span>${o.price?`<span style="font-weight:600;color:#e91e63;">¥${o.price}</span>`:''}</div>`).join('')}
+
+// click hearts
+document.addEventListener('click',function(e){const h=['💕','💖','💗','💝','✨','🌸'];const el=document.createElement('span');el.className='click-heart';el.textContent=h[Math.floor(Math.random()*h.length)];el.style.left=e.clientX-12+'px';el.style.top=e.clientY-12+'px';const dx=(Math.random()-0.5)*80;el.style.setProperty('--dx30',dx*0.3+'px');el.style.setProperty('--dx100',dx+'px');el.style.fontSize=(18+Math.random()*14)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),1200)});
+
+// floats
+(function(){const c=document.getElementById('floatContainer'),e=['🌸','💕','✨','🦋','💖','🌷','🎀','💗','🍬','🌟','🕊️','💐'];for(let i=0;i<20;i++){const el=document.createElement('span');el.className='float-item';el.textContent=e[Math.floor(Math.random()*e.length)];el.style.left=Math.random()*100+'%';el.style.animationDuration=(8+Math.random()*18)+'s';el.style.animationDelay=Math.random()*14+'s';el.style.fontSize=(14+Math.random()*20)+'px';c.appendChild(el)}})();
+
+// init
+renderAnn();renderTeaOpts();updateTeaSummary();renderTeaHistory();setInterval(renderAnn,1000);
+
+['settingsModal','holidayModal','milestoneModal','orderModal','meetingModal','albumModal'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this){if(id==='orderModal')this.classList.remove('show');else if(id==='albumModal')closeAlbumForm();else if(id==='meetingModal')closeMeetingSettings();else if(id==='holidayModal')closeHolidayForm();else if(id==='milestoneModal')closeMilestoneForm();else closeSettings()}})});
+</script>
+</body>
+</html>

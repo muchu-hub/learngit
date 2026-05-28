@@ -1,0 +1,9 @@
+{
+  "pages": ["pages/index/index"],
+  "window": {
+    "navigationBarTitleText": "赫 & 莎",
+    "navigationBarBackgroundColor": "#fce4ec",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fce4ec"
+  }
+}

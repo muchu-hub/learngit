@@ -1,0 +1,226 @@
+<view class="container">
+  <!-- tab bar -->
+  <view class="tab-bar">
+    <view class="tab-btn {{activeTab==='ann'?'active':''}}" bindtap="switchTab" data-tab="ann">💕 纪念日</view>
+    <view class="tab-btn {{activeTab==='tea'?'active':''}}" bindtap="switchTab" data-tab="tea">🧋 点奶茶</view>
+  </view>
+
+  <!-- ====== 纪念日 ====== -->
+  <view wx:if="{{activeTab==='ann'}}" class="tab-panel">
+    <view class="header">
+      <view class="title">赫 ♡ 莎</view>
+      <view class="subtitle">珍惜每一个重要的日子</view>
+    </view>
+
+    <!-- 情侣卡 -->
+    <view class="card couple-card">
+      <view class="couple-photo">
+        <image src="/photos/couple.jpg" mode="aspectFill" class="cp-img"></image>
+        <view class="photo-names"><text>莎</text><text class="heart-icon">💕</text><text>赫</text></view>
+      </view>
+      <view class="big-days"><view class="number">{{couple.days}}</view><view class="label">我们已经在一起</view></view>
+      <view class="start-date">{{couple.startText}}</view>
+      <view class="live-timer">
+        <view class="item"><view class="val">{{couple.years}}</view><view class="unit">年</view></view>
+        <view class="item"><view class="val">{{couple.months}}</view><view class="unit">月</view></view>
+        <view class="item"><view class="val">{{couple.day}}</view><view class="unit">天</view></view>
+        <view class="item"><view class="val">{{couple.hms}}</view><view class="unit">时:分:秒</view></view>
+      </view>
+      <view class="ann-progress">
+        <view class="bar-bg"><view class="bar-fill" style="width:{{couple.pct}}%"></view></view>
+        <view class="bar-text"><text>{{couple.annStart}}</text><text>{{couple.annEnd}}</text></view>
+      </view>
+      <view class="countdown-row">
+        <view class="countdown-item"><view class="val">{{couple.cdDays}}</view><view class="unit">天</view></view>
+        <view class="countdown-item"><view class="val">{{couple.cdHours}}</view><view class="unit">小时</view></view>
+        <view class="countdown-item"><view class="val">{{couple.cdMins}}</view><view class="unit">分钟</view></view>
+        <view class="countdown-item"><view class="val">{{couple.cdSecs}}</view><view class="unit">秒</view></view>
+      </view>
+      <view class="cd-label">{{couple.annLabel}}</view>
+    </view>
+
+    <!-- 情话 -->
+    <view class="card quote-card">
+      <view class="card-label">每日情话</view>
+      <view class="quote-text">"{{quote.text}}"</view>
+      <view class="quote-author">—— {{quote.author}}</view>
+    </view>
+
+    <!-- 见面倒计时 / 状态 -->
+    <view class="card">
+      <view class="sub-tab-bar">
+        <view class="sub-tab {{subTab==='meeting'?'active':''}}" bindtap="switchSubTab" data-sub="meeting">📅 见面倒计时</view>
+        <view class="sub-tab {{subTab==='status'?'active':''}}" bindtap="switchSubTab" data-sub="status">💬 在干什么</view>
+      </view>
+
+      <view wx:if="{{subTab==='meeting'}}" class="tc">
+        <view class="big-days"><view class="number">{{meeting.days}}</view><view class="label">天</view></view>
+        <view class="countdown-row" style="margin-top:4px">
+          <view class="countdown-item"><view class="val">{{meeting.hours}}</view><view class="unit">小时</view></view>
+          <view class="countdown-item"><view class="val">{{meeting.mins}}</view><view class="unit">分钟</view></view>
+          <view class="countdown-item"><view class="val">{{meeting.secs}}</view><view class="unit">秒</view></view>
+        </view>
+        <view class="mt-label">{{meeting.label}}</view>
+        <button class="btn-sm" bindtap="openMeetingSettings">设置见面日期</button>
+      </view>
+
+      <view wx:if="{{subTab==='status'}}">
+        <view wx:if="{{status.text}}" class="status-box">
+          <view class="st-text">💬 {{status.text}}</view>
+          <view class="st-time">{{status.time}}</view>
+        </view>
+        <view wx:else class="empty-state">还没有更新状态呢~</view>
+        <view class="status-input-row">
+          <input class="s-input" placeholder="例如：正在想莎..." value="{{statusInput}}" bindinput="onStatusInput"/>
+          <button class="btn-primary btn-s" bindtap="updateStatus">更新</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 里程碑 -->
+    <view class="card">
+      <view class="card-label">我们的里程碑</view>
+      <view class="timeline">
+        <view class="timeline-item" wx:for="{{milestones}}" wx:key="id">
+          <view class="timeline-dot">{{item.emoji}}</view>
+          <view class="tc-content">
+            <view class="t-title">{{item.title}}</view>
+            <view class="t-date">{{item.dateStr}}</view>
+            <view class="t-desc" wx:if="{{item.desc}}">{{item.desc}}</view>
+          </view>
+        </view>
+      </view>
+      <button class="btn-sm" bindtap="openMilestoneForm" style="margin-top:10px">+ 添加里程碑</button>
+    </view>
+
+    <!-- 相册 -->
+    <view class="card">
+      <view class="card-label">回忆相册</view>
+      <view wx:if="{{album.length===0}}" class="empty-state">还没有照片\n添加你们的甜蜜瞬间吧 💕</view>
+      <view class="album-grid" wx:if="{{album.length>0}}">
+        <view class="album-item" wx:for="{{album}}" wx:key="id" bindtap="previewPhoto" data-idx="{{index}}">
+          <image src="/photos/{{item.file}}" mode="aspectFill" class="album-img"></image>
+          <view class="album-caption">{{item.cap}}{{item.dateStr?' · '+item.dateStr:''}}</view>
+          <view class="album-delete" catchtap="deleteAlbumPhoto" data-id="{{item.id}}">×</view>
+        </view>
+      </view>
+      <button class="btn-sm" bindtap="openAlbumForm" style="margin-top:10px">+ 添加照片</button>
+    </view>
+
+    <!-- 节日 -->
+    <view class="card">
+      <view class="card-label">重要节日</view>
+      <view class="holiday-list">
+        <view class="holiday-row {{item.upcoming||item.isToday?'upcoming':''}}" wx:for="{{holidays}}" wx:key="id">
+          <view class="holiday-emoji">{{item.emoji}}</view>
+          <view class="holiday-info"><view class="h-name">{{item.name}}{{item.isToday?' 🎀':''}}</view><view class="h-date">{{item.dateText}}</view></view>
+          <view class="holiday-badge {{item.badgeClass}}" wx:if="{{item.badge}}">{{item.badge}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="settings-bar">
+      <button class="btn-sm" bindtap="openSettings">设置恋爱日期</button>
+      <button class="btn-sm" bindtap="openHolidayForm">添加节日</button>
+    </view>
+    <view class="footer">赫 ❤️ 莎 — 记录我们的每一天</view>
+  </view>
+
+  <!-- ====== 点奶茶 ====== -->
+  <view wx:if="{{activeTab==='tea'}}" class="tab-panel">
+    <view class="header">
+      <view class="title">🧋 为莎点一杯奶茶</view>
+      <view class="subtitle">赫的小小心意</view>
+    </view>
+    <view class="card">
+      <view class="card-label">我想喝...</view>
+      <view class="input-row"><view class="i-label">店名 / 奶茶名称</view><input class="i-input" placeholder="例如：喜茶 多肉葡萄" value="{{tea.name}}" bindinput="onTeaName"/></view>
+      <view class="input-row"><view class="i-label">价格（可选）</view><input class="i-input" type="number" placeholder="例如：22" value="{{tea.price}}" bindinput="onTeaPrice" style="width:100px"/></view>
+      <view class="opt-row"><view class="o-label">甜度</view><view class="o-btns"><view class="o-btn {{tea.sugar===s?'active':''}}" wx:for="{{sugarOpts}}" wx:key="*this" wx:for-item="s" wx:for-index="i" bindtap="setSugar" data-v="{{s}}">{{s}}</view></view></view>
+      <view class="opt-row"><view class="o-label">温度</view><view class="o-btns"><view class="o-btn {{tea.ice===s?'active':''}}" wx:for="{{iceOpts}}" wx:key="*this" wx:for-item="s" bindtap="setIce" data-v="{{s}}">{{s}}</view></view></view>
+      <view class="opt-row"><view class="o-label">加料</view><view class="o-btns"><view class="o-btn topping {{tea.toppings.indexOf(t)>=0?'active':''}}" wx:for="{{toppingOpts}}" wx:key="*this" wx:for-item="t" bindtap="toggleTopping" data-v="{{t}}">{{t}}</view></view></view>
+      <view class="tea-summary">
+        <view class="s-row"><text>🧋 {{tea.name||'（未填写）'}}</text><text wx:if="{{tea.price}}">¥{{tea.price}}</text></view>
+        <view class="s-row"><text>甜度 / 温度</text><text>{{tea.sugar}} / {{tea.ice}}</text></view>
+        <view class="s-row" wx:if="{{tea.toppings.length}}"><text>加料</text><text>{{tea.toppingStr}}</text></view>
+      </view>
+      <button class="btn-primary" bindtap="placeOrder" style="margin-top:12px">💝 下单</button>
+    </view>
+    <view class="card">
+      <view class="card-label">订单记录</view>
+      <view wx:if="{{teaOrders.length===0}}" class="empty-state">还没有订单记录\n给莎点第一杯奶茶吧 💕</view>
+      <view class="history-item" wx:for="{{teaOrders}}" wx:key="time">
+        <view class="h-icon">🧋</view>
+        <view class="h-info"><view class="h-name">{{item.name}}</view><view class="h-detail">{{item.sugar}} / {{item.ice}}{{item.toppingStr?' + '+item.toppingStr:''}} · {{item.time}}</view></view>
+        <view class="h-price" wx:if="{{item.price}}">¥{{item.price}}</view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- modals -->
+<view class="modal-overlay {{showSettings?'show':''}}" bindtap="closeSettings">
+  <view class="modal" catchtap="">
+    <view class="m-title">设置恋爱开始日期</view>
+    <view class="m-label">选择你们在一起的那一天</view>
+    <picker mode="date" value="{{settingsDate}}" bindchange="onSettingsDateChange"><view class="picker-val">{{settingsDate||'请选择日期'}}</view></picker>
+    <view class="btn-row"><button class="btn-cancel" bindtap="closeSettings">取消</button><button class="btn-save" bindtap="saveCoupleDate">保存</button></view>
+  </view>
+</view>
+
+<view class="modal-overlay {{showHoliday?'show':''}}" bindtap="closeHolidayForm">
+  <view class="modal" catchtap="">
+    <view class="m-title">添加重要节日</view>
+    <view class="m-label">节日名称</view><input class="m-input" placeholder="例如：第一次旅行纪念日" value="{{holidayForm.name}}" bindinput="onHolidayName"/>
+    <view class="m-label">日期</view><picker mode="date" value="{{holidayForm.date}}" bindchange="onHolidayDateChange"><view class="picker-val">{{holidayForm.date||'请选择日期'}}</view></picker>
+    <view class="m-label">图标</view>
+    <view class="emoji-row">
+      <view class="emoji-item {{holidayForm.emoji===e?'active':''}}" wx:for="{{holidayEmojis}}" wx:key="*this" wx:for-item="e" bindtap="setHolidayEmoji" data-v="{{e}}">{{e}}</view>
+    </view>
+    <view class="m-label">每年重复</view>
+    <view class="switch-row"><text>每年提醒</text><switch checked="{{holidayForm.repeat}}" bindchange="onHolidayRepeat"/></view>
+    <view class="btn-row"><button class="btn-cancel" bindtap="closeHolidayForm">取消</button><button class="btn-save" bindtap="addHoliday">添加</button></view>
+  </view>
+</view>
+
+<view class="modal-overlay {{showMilestone?'show':''}}" bindtap="closeMilestoneForm">
+  <view class="modal" catchtap="">
+    <view class="m-title">添加里程碑</view>
+    <view class="m-label">标题</view><input class="m-input" placeholder="例如：第一次旅行" value="{{msForm.title}}" bindinput="onMsTitle"/>
+    <view class="m-label">日期</view><picker mode="date" value="{{msForm.date}}" bindchange="onMsDateChange"><view class="picker-val">{{msForm.date||'请选择日期'}}</view></picker>
+    <view class="m-label">一句话描述</view><input class="m-input" placeholder="例如：一起去了海边" value="{{msForm.desc}}" bindinput="onMsDesc"/>
+    <view class="m-label">图标</view>
+    <view class="emoji-row">
+      <view class="emoji-item {{msForm.emoji===e?'active':''}}" wx:for="{{msEmojis}}" wx:key="*this" wx:for-item="e" bindtap="setMsEmoji" data-v="{{e}}">{{e}}</view>
+    </view>
+    <view class="btn-row"><button class="btn-cancel" bindtap="closeMilestoneForm">取消</button><button class="btn-save" bindtap="addMilestone">添加</button></view>
+  </view>
+</view>
+
+<view class="modal-overlay {{showMeeting?'show':''}}" bindtap="closeMeetingSettings">
+  <view class="modal" catchtap="">
+    <view class="m-title">设置下次见面日期</view>
+    <view class="m-label">选择下次见面的日期</view>
+    <picker mode="date" value="{{meetingDate}}" bindchange="onMeetingDateChange"><view class="picker-val">{{meetingDate||'请选择日期'}}</view></picker>
+    <view class="btn-row"><button class="btn-cancel" bindtap="closeMeetingSettings">取消</button><button class="btn-save" bindtap="saveMeetingDate">保存</button></view>
+  </view>
+</view>
+
+<view class="modal-overlay {{showAlbum?'show':''}}" bindtap="closeAlbumForm">
+  <view class="modal" catchtap="">
+    <view class="m-title">添加照片</view>
+    <view class="m-label">照片文件名</view><input class="m-input" placeholder="例如：couple.jpg（放在 photos/ 文件夹）" value="{{albumForm.file}}" bindinput="onAlbumFile"/>
+    <view class="m-label">一句话说明</view><input class="m-input" placeholder="例如：第一次一起看海" value="{{albumForm.cap}}" bindinput="onAlbumCap"/>
+    <view class="m-label">日期</view><picker mode="date" value="{{albumForm.date}}" bindchange="onAlbumDateChange"><view class="picker-val">{{albumForm.date||'请选择日期'}}</view></picker>
+    <view class="btn-row"><button class="btn-cancel" bindtap="closeAlbumForm">取消</button><button class="btn-save" bindtap="addAlbumPhoto">添加</button></view>
+  </view>
+</view>
+
+<view class="modal-overlay {{orderDone?'show':''}}" bindtap="closeOrderDone">
+  <view class="modal" catchtap="" style="text-align:center">
+    <view style="font-size:44px;margin-bottom:8px">💌</view>
+    <view class="m-title">下单成功！</view>
+    <view class="order-msg">{{orderMsg}}</view>
+    <button class="btn-save" bindtap="closeOrderDone">好的</button>
+  </view>
+</view>
